@@ -4,5 +4,5 @@ from django import forms
 
 
 class UploadForm(forms.Form):    
-    file = forms.FileField() # for creating file input
-    file2 = forms.FileField()
+    Cover_image = forms.FileField() # for creating file input
+    Image_to_be_merged = forms.FileField()
