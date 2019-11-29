@@ -10,5 +10,14 @@
                 <br> <br><br>
                 <a href="{% url 'unmerge' %}" class="btn btn-primary" role="button">Un-Merge</a>
 
+                <!-- <form  method="post" class="post-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ sendtoform|crispy }}
+                
+                </form> -->
+                <a href="{% url 'sendto' %}" class="btn btn-primary" role="button">Send Image</a>
+
+
+
         </body>
 {% endblock %}

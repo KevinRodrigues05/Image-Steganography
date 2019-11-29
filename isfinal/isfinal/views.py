@@ -1,13 +1,17 @@
 from django.shortcuts import render
-from .forms import UploadForm
+from .forms import UploadForm, usernameform
 from .functions import *
 
+import os
+import shutil
 
 import click
 from PIL import Image
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
 class Steganography(object):
 
     @staticmethod
@@ -150,12 +154,13 @@ def finalUnmerge(request):
 
     return render(request,'result.html')
 
+@login_required(login_url='/accounts/login/')
 def home(request):
     if request.method == 'POST':  
         uploadfile = UploadForm(request.POST, request.FILES)
         if uploadfile.is_valid():  
-            filename1 = handle_uploaded_file(request.FILES['file'])
-            filename2 = handle_uploaded_file(request.FILES['file2']) 
+            filename1 = handle_uploaded_file(request.FILES['Cover_image'])
+            filename2 = handle_uploaded_file(request.FILES['Image_to_be_merged']) 
         print(filename1)
         print(filename2)
 
@@ -165,7 +170,7 @@ def home(request):
 
         merge(img_url1,img_url2,out_url)
 
-        student = UploadForm()
+        
         return render(request,"unmerge.html",{'output':out_url})
     else:
 
@@ -178,11 +183,66 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
+            dir_name = "media/"
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
+            if not os.path.exists(dir_name+username):
+                os.mkdir(dir_name+username)
+
             user = authenticate(username=username, password=raw_password)
             login(request, user)
             return redirect('home')
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+
+
+
+@login_required(login_url='/accounts/login/')
+def sendimage(request):
+    if request.method == "POST":
+
+        form = usernameform(request.POST)
+        if form.is_valid():
+            
+            username = form.cleaned_data['Send_to']
+            print(username)
+            input_url = "isfinal/static/output.png"
+            output_url = "media/"+username+"/newImage.png"
+
+            # os.rename(input_url, output_url)
+            shutil.move(input_url, output_url)
+            # os.replace(input_url, output_url)
+
+
+
+        student = UploadForm() 
+        return render(request, 'home.html', {'form':student})
+
+
+    
+    sendTo = usernameform()
+    return render(request, 'sendto.html',{'form': sendTo})
+
+
+@login_required(login_url='/accounts/login/')
+def inbox(request):
+    username = None
+    if request.user.is_authenticated:
+        username = request.user.username
+
+
+    if request.method == "POST":
+
+        in_url = "media/"+username+"/newImage.png"
+        out_url = "isfinal/static/output2.png"
+
+        unmerge(in_url,out_url)
+
+        return render(request,'result.html')
+
+
+
+    img_url = "/media/"+username+"/newImage.png"
+    return render(request, 'inbox.html', {'img_url': img_url})

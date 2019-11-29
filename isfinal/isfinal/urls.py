@@ -18,6 +18,7 @@ from django.urls import path, include
 from . import views
 from django.conf.urls.static import static 
 from django.conf import settings 
+import django_messages
 
 
 urlpatterns = [
@@ -26,5 +27,9 @@ urlpatterns = [
     path('unmerge/',views.finalUnmerge, name="unmerge"),
     path('accounts/', include('django.contrib.auth.urls')), # new
     path('signup/', views.signup, name='signup'),
+    path('messages/', include('django_messages.urls')),
+    path('sendto/', views.sendimage, name="sendto"),
+    path('inbox/', views.inbox, name="inbox"),
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
